@@ -1,7 +1,21 @@
+import os
+# change default hf cache dir
+os.environ["HF_HOME"] = "/data/yuansui/cache/"
+
+# remove unnecessary warnings
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
+from huggingface_hub import login
+login(token=os.getenv("HUB_TOKEN"))
+
 import logging
 import random
 import sys
-
 import torch
 import transformers
 from transformers import AutoModelForCausalLM, set_seed
@@ -10,6 +24,7 @@ from dataclasses import dataclass, field
 from alignment import (
     DataArguments,
     DPOConfig,
+    SFTConfig,
     H4ArgumentParser,
     ModelArguments,
     get_checkpoint,
@@ -22,7 +37,6 @@ from alignment import (
 from stepdpo_trainer import StepDPOTrainer
 
 from datasets import load_dataset
-
 
 logger = logging.getLogger(__name__)
 
@@ -146,6 +160,18 @@ def main():
         )
     else:
         raw_datasets = load_dataset(training_args.data_path)
+        
+    ###########################
+    #################
+    ##############
+    ##########    
+    raw_datasets["train"] = raw_datasets["train"].select(range(1000))
+    if "test" in raw_datasets.keys():
+        raw_datasets["test"] = raw_datasets["test"].select(range(200))
+    #######################
+    #################
+    ##############
+    ##########    
 
     logger.info(
         f"Training on the following splits: {[split + ' : ' + str(dset.num_rows) for split, dset in raw_datasets.items()]}"
@@ -189,7 +215,7 @@ def main():
     model_kwargs = dict(
         revision=model_args.model_revision,
         trust_remote_code=model_args.trust_remote_code,
-        use_flash_attention_2=model_args.use_flash_attention_2,
+        # use_flash_attention_2=model_args.use_flash_attention_2,
         torch_dtype=torch_dtype,
         use_cache=False if training_args.gradient_checkpointing else True,
         device_map=get_kbit_device_map() if quantization_config is not None else None,
@@ -221,6 +247,7 @@ def main():
         max_prompt_length=training_args.max_prompt_length,
         peft_config=get_peft_config(model_args),
         loss_type=training_args.loss_type,
+        dataset_num_proc=training_args.dataset_num_proc
     )
 
     ###############
@@ -253,6 +280,7 @@ def main():
         "dataset": [training_args.data_path],
         "dataset_tags": [training_args.data_path],
         "tags": ["alignment-handbook"],
+        "model_name": model_args.model_name_or_path.split("/")[-1],
     }
     if trainer.accelerator.is_main_process:
         trainer.create_model_card(**kwargs)

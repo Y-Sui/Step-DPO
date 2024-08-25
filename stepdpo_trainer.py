@@ -1,4 +1,6 @@
 # Modified from trl/trl/trainer/dpo_trainer.py
+# from trl.trainer import dpo_trainer
+import torch
 from torch import nn
 from trl import DPOTrainer
 from transformers import PreTrainedModel

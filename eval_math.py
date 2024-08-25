@@ -197,7 +197,7 @@ def parse_args():
     parser.add_argument("--prompt", type=str, default='alpaca')
     parser.add_argument("--temp", type=float, default=0.0)
     parser.add_argument("--top_p", type=float, default=1.0)
-    parser.add_argument("--seed", type=int, default=None)
+    parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--rep", type=int, default=1)
     return parser.parse_args()
 
