@@ -21,6 +21,6 @@ ACCELERATE_LOG_LEVEL=info accelerate launch --config_file accelerate_configs/dee
     --prompt=$prompt \
     --push_to_hub=True
 
-python eval_math.py --model $output_dir --data_file /data/yuansui/dpo/data/test/GSM8K_test_data.jsonl --save_path 'eval_results/gsm8k/'$output_dir/$hub_model_id'.json' --prompt $prompt --tensor_parallel_size 4
+python eval_math.py --model $output_dir/$hub_model_id --data_file /data/yuansui/dpo/data/test/GSM8K_test_data.jsonl --save_path 'eval_results/gsm8k/'$hub_model_id'.json' --prompt $prompt --tensor_parallel_size 4
 
 # python eval_math.py --model outputs/$output_dir --data_file ./data/test/MATH_test_data.jsonl --save_path 'eval_results/math/'$output_dir'.json' --prompt $prompt --tensor_parallel_size 4

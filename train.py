@@ -165,9 +165,9 @@ def main():
     #################
     ##############
     ##########    
-    raw_datasets["train"] = raw_datasets["train"].select(range(1000))
+    raw_datasets["train"] = raw_datasets["train"].select(range(100))
     if "test" in raw_datasets.keys():
-        raw_datasets["test"] = raw_datasets["test"].select(range(200))
+        raw_datasets["test"] = raw_datasets["test"].select(range(20))
     #######################
     #################
     ##############
@@ -298,6 +298,14 @@ def main():
         trainer.log_metrics("eval", metrics)
         trainer.save_metrics("eval", metrics)
 
+    
+    kwargs = {
+        "finetuned_from": model_args.model_name_or_path.split("/")[-1],
+        "dataset": [training_args.data_path],
+        "dataset_tags": [training_args.data_path],
+        "tags": ["alignment-handbook"],
+        "model_name": model_args.model_name_or_path.split("/")[-1],
+    }
     if training_args.push_to_hub is True:
         logger.info("Pushing to hub...")
         trainer.push_to_hub(**kwargs)
